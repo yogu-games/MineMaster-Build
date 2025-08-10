@@ -15,7 +15,7 @@ var config = {
   streamingAssetsUrl: "StreamingAssets",
   companyName: "YoGu-Games",
   productName: "MineMaster",
-  productVersion: "0.0.47"
+  productVersion: "0.0.49"
 };
 
 if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))
