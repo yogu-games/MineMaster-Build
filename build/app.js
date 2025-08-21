@@ -7,15 +7,15 @@ var loadingBar = document.querySelector("#unity-loading-bar");
 var progressBarFull = document.querySelector("#unity-progress-bar-full");
 
 var buildUrl = "Build";
-var loaderUrl = buildUrl + "/build.loader.js";
+var loaderUrl = buildUrl + "/Default WebGL.loader.js";
 var config = {
-  dataUrl: buildUrl + "/build.data",
-  frameworkUrl: buildUrl + "/build.framework.js",
-  codeUrl: buildUrl + "/build.wasm",
+  dataUrl: buildUrl + "/Default WebGL.data",
+  frameworkUrl: buildUrl + "/Default WebGL.framework.js",
+  codeUrl: buildUrl + "/Default WebGL.wasm",
   streamingAssetsUrl: "StreamingAssets",
   companyName: "YoGu-Games",
   productName: "MineMaster",
-  productVersion: "0.0.68"
+  productVersion: "0.0.70"
 };
 
 if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))
