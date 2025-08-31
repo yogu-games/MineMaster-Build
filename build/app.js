@@ -15,7 +15,7 @@ var config = {
   streamingAssetsUrl: "StreamingAssets",
   companyName: "YoGu-Games",
   productName: "MineMaster",
-  productVersion: "0.1.1"
+  productVersion: "0.1.37"
 };
 
 if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))
@@ -39,8 +39,8 @@ script.onload = () =>
     let finalizingMsg = null;
     createUnityInstance(canvas, config, (progress) => 
     {
-      if (progress < 0.90) {
-        progressBarFull.style.width = (100 * (progress / 0.90)) + "%";
+      if (progress < 0.87) {
+        progressBarFull.style.width = (100 * (progress / 0.87)) + "%";
         progressBarFull.classList.remove("indeterminate");
         if (finalizingMsg) {
           finalizingMsg.remove();
