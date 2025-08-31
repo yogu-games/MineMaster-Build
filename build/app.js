@@ -15,7 +15,7 @@ var config = {
   streamingAssetsUrl: "StreamingAssets",
   companyName: "YoGu-Games",
   productName: "MineMaster",
-  productVersion: "0.1.6"
+  productVersion: "0.1.1"
 };
 
 if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))
@@ -35,15 +35,41 @@ script.src = loaderUrl;
   
 script.onload = () => 
 {
+    let indeterminateShown = false;
+    let finalizingMsg = null;
     createUnityInstance(canvas, config, (progress) => 
     {
-      progressBarFull.style.width = 100 * progress + "%";
+      if (progress < 0.90) {
+        progressBarFull.style.width = (100 * (progress / 0.90)) + "%";
+        progressBarFull.classList.remove("indeterminate");
+        if (finalizingMsg) {
+          finalizingMsg.remove();
+          finalizingMsg = null;
+        }
+        indeterminateShown = false;
+      } else {
+        // Show indeterminate spinner/message at the end
+        if (!indeterminateShown) {
+          progressBarFull.style.width = "100%";
+          progressBarFull.classList.add("indeterminate");
+          // Show a message
+          finalizingMsg = document.createElement("div");
+          finalizingMsg.id = "unity-finalizing-msg";
+          finalizingMsg.innerText = "Finalizing...";
+          finalizingMsg.style.marginTop = "10px";
+          finalizingMsg.style.textAlign = "center";
+          loadingBar.appendChild(finalizingMsg);
+          indeterminateShown = true;
+        }
+      }
     }
     ).then((unityInstance) => 
     {
       appInstance = unityInstance;
-      
-      loadingBar.style.display = "none";
+      // Fade out loading bar
+      loadingBar.style.transition = "opacity 0.5s";
+      loadingBar.style.opacity = 0;
+      setTimeout(() => loadingBar.style.display = "none", 500);
     }
     ).catch((message) => 
     {
