@@ -5,6 +5,7 @@ var container = document.querySelector("#unity-container");
 var canvas = document.querySelector("#unity-canvas");
 var loadingBar = document.querySelector("#unity-loading-bar");
 var progressBarFull = document.querySelector("#unity-progress-bar-full");
+var progressBarEmpty = document.querySelector("#unity-progress-bar-empty");
 
 var buildUrl = "Build";
 var loaderUrl = buildUrl + "/Default WebGL.loader.js";
@@ -15,7 +16,7 @@ var config = {
   streamingAssetsUrl: "StreamingAssets",
   companyName: "YoGu-Games",
   productName: "MineMaster",
-  productVersion: "0.1.37"
+  productVersion: "0.1.38"
 };
 
 if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))
@@ -52,12 +53,24 @@ script.onload = () =>
         if (!indeterminateShown) {
           progressBarFull.style.width = "100%";
           progressBarFull.classList.add("indeterminate");
+          // Fade out the progress bar graphics since we no longer need them
+          if (progressBarEmpty) {
+            progressBarEmpty.classList.add("fade-out");
+            const hideOnTransitionEnd = (e) => {
+              if (e.propertyName === "opacity") {
+                progressBarEmpty.style.display = "none";
+                progressBarEmpty.removeEventListener('transitionend', hideOnTransitionEnd);
+              }
+            };
+            progressBarEmpty.addEventListener('transitionend', hideOnTransitionEnd);
+          }
           // Show a message
           finalizingMsg = document.createElement("div");
           finalizingMsg.id = "unity-finalizing-msg";
           finalizingMsg.innerText = "Finalizing...";
           finalizingMsg.style.marginTop = "10px";
           finalizingMsg.style.textAlign = "center";
+          finalizingMsg.style.color = "#fff";
           loadingBar.appendChild(finalizingMsg);
           indeterminateShown = true;
         }
