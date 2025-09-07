@@ -16,7 +16,7 @@ var config = {
   streamingAssetsUrl: "StreamingAssets",
   companyName: "YoGu-Games",
   productName: "MineMaster",
-  productVersion: "0.1.45"
+  productVersion: "0.1.46"
 };
 
 if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))
@@ -92,6 +92,37 @@ script.onload = () =>
   
 document.body.appendChild(script);
   
+// ---------------- Portrait Orientation Enforcement ----------------
+function updateOrientationState() {
+  var isPortrait = window.matchMedia && window.matchMedia("(orientation: portrait)").matches;
+  if (isPortrait) {
+    document.body.classList.remove('landscape');
+    if (canvas) canvas.style.pointerEvents = 'auto';
+  } else {
+    document.body.classList.add('landscape');
+    if (canvas) canvas.style.pointerEvents = 'none';
+  }
+}
+
+async function tryLockPortrait() {
+  var orientationObject = screen.orientation || screen.msOrientation || screen.mozOrientation;
+  if (orientationObject && orientationObject.lock) {
+    try { await orientationObject.lock('portrait'); } catch(e) { /* silently ignore */ }
+  }
+}
+
+// Attempt lock on first user interaction (required by many browsers)
+window.addEventListener('pointerdown', function once() {
+  tryLockPortrait();
+  window.removeEventListener('pointerdown', once);
+});
+
+window.addEventListener('orientationchange', updateOrientationState);
+window.addEventListener('resize', updateOrientationState);
+// Initial state (script loaded after DOM so safe)
+updateOrientationState();
+// ------------------------------------------------------------------
+
 window.addEventListener('load', function ()
 {
   Telegram.WebApp.ready();
