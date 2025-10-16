@@ -7,47 +7,28 @@ var loadingBar = document.querySelector("#unity-loading-bar");
 var progressBarFull = document.querySelector("#unity-progress-bar-full");
 var progressBarEmpty = document.querySelector("#unity-progress-bar-empty");
 
-function parseUnityValue(rawValue, fallback) {
-  if (!rawValue) {
-    return typeof fallback === "undefined" ? "" : fallback;
-  }
-  try {
-    return JSON.parse(rawValue);
-  } catch (e) {
-    return rawValue;
-  }
-}
-
 var buildUrl = "Build";
 var loaderUrl = buildUrl + "/{{{ LOADER_FILENAME }}}";
 var config = {
   dataUrl: buildUrl + "/{{{ DATA_FILENAME }}}",
   frameworkUrl: buildUrl + "/{{{ FRAMEWORK_FILENAME }}}",
+#if USE_THREADS
+  workerUrl: buildUrl + "/{{{ WORKER_FILENAME }}}",
+#endif
+#if USE_WASM
+  codeUrl: buildUrl + "/{{{ CODE_FILENAME }}}",
+#endif
+#if MEMORY_FILENAME
+  memoryUrl: buildUrl + "/{{{ MEMORY_FILENAME }}}",
+#endif
+#if SYMBOLS_FILENAME
+  symbolsUrl: buildUrl + "/{{{ SYMBOLS_FILENAME }}}",
+#endif
   streamingAssetsUrl: "StreamingAssets",
-  companyName: parseUnityValue("{{{ JSON.stringify(COMPANY_NAME) }}}"),
-  productName: parseUnityValue("{{{ JSON.stringify(PRODUCT_NAME) }}}"),
-  productVersion: parseUnityValue("{{{ JSON.stringify(PRODUCT_VERSION) }}}")
+  companyName: {{{ JSON.stringify(COMPANY_NAME) }}},
+  productName: {{{ JSON.stringify(PRODUCT_NAME) }}},
+  productVersion: {{{ JSON.stringify(PRODUCT_VERSION) }}}
 };
-
-var workerFilename = "{{{ WORKER_FILENAME }}}".trim();
-if (workerFilename) {
-  config.workerUrl = buildUrl + "/" + workerFilename;
-}
-
-var codeFilename = "{{{ CODE_FILENAME }}}".trim();
-if (codeFilename) {
-  config.codeUrl = buildUrl + "/" + codeFilename;
-}
-
-var memoryFilename = "{{{ MEMORY_FILENAME }}}".trim();
-if (memoryFilename) {
-  config.memoryUrl = buildUrl + "/" + memoryFilename;
-}
-
-var symbolsFilename = "{{{ SYMBOLS_FILENAME }}}".trim();
-if (symbolsFilename) {
-  config.symbolsUrl = buildUrl + "/" + symbolsFilename;
-}
 
 if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))
 {
@@ -59,10 +40,9 @@ if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))
   document.getElementsByTagName('head')[0].appendChild(meta);
 }
   
-var backgroundFilename = "{{{ BACKGROUND_FILENAME }}}".trim();
-if (backgroundFilename) {
-  canvas.style.background = "url('" + buildUrl + "/" + backgroundFilename.replace(/'/g, '%27') + "') center / cover";
-}
+#if BACKGROUND_FILENAME
+canvas.style.background = "url('" + buildUrl + "/{{{ BACKGROUND_FILENAME.replace(/'/g, '%27') }}}') center / cover";
+#endif
 loadingBar.style.display = "block";
   
 var script = document.createElement("script");
