@@ -7,44 +7,44 @@ var loadingBar = document.querySelector("#unity-loading-bar");
 var progressBarFull = document.querySelector("#unity-progress-bar-full");
 var progressBarEmpty = document.querySelector("#unity-progress-bar-empty");
 
+function parseUnityValue(rawValue, fallback) {
+  if (!rawValue) {
+    return typeof fallback === "undefined" ? "" : fallback;
+  }
+  try {
+    return JSON.parse(rawValue);
+  } catch (e) {
+    return rawValue;
+  }
+}
+
 var buildUrl = "Build";
 var loaderUrl = buildUrl + "/{{{ LOADER_FILENAME }}}";
 var config = {
   dataUrl: buildUrl + "/{{{ DATA_FILENAME }}}",
   frameworkUrl: buildUrl + "/{{{ FRAMEWORK_FILENAME }}}",
   streamingAssetsUrl: "StreamingAssets",
-  companyName: (function () {
-    try { return JSON.parse('{{{ JSON.stringify(COMPANY_NAME) }}}'); }
-    catch (e) { return typeof COMPANY_NAME !== "undefined" ? COMPANY_NAME : ""; }
-  })(),
-  productName: (function () {
-    try { return JSON.parse('{{{ JSON.stringify(PRODUCT_NAME) }}}'); }
-    catch (e) { return typeof PRODUCT_NAME !== "undefined" ? PRODUCT_NAME : ""; }
-  })(),
-  productVersion: (function () {
-    try { return JSON.parse('{{{ JSON.stringify(PRODUCT_VERSION) }}}'); }
-    catch (e) { return typeof PRODUCT_VERSION !== "undefined" ? PRODUCT_VERSION : ""; }
-  })()
+  companyName: parseUnityValue("{{{ JSON.stringify(COMPANY_NAME) }}}"),
+  productName: parseUnityValue("{{{ JSON.stringify(PRODUCT_NAME) }}}"),
+  productVersion: parseUnityValue("{{{ JSON.stringify(PRODUCT_VERSION) }}}")
 };
 
-var useThreads = JSON.parse("{{{ JSON.stringify((typeof USE_THREADS !== 'undefined') && USE_THREADS) }}}");
-var workerFilename = "{{{ typeof WORKER_FILENAME !== 'undefined' ? WORKER_FILENAME : '' }}}";
-if (useThreads && workerFilename) {
+var workerFilename = "{{{ WORKER_FILENAME }}}".trim();
+if (workerFilename) {
   config.workerUrl = buildUrl + "/" + workerFilename;
 }
 
-var useWasm = JSON.parse("{{{ JSON.stringify((typeof USE_WASM !== 'undefined') && USE_WASM) }}}");
-var codeFilename = "{{{ typeof CODE_FILENAME !== 'undefined' ? CODE_FILENAME : '' }}}";
-if (useWasm && codeFilename) {
+var codeFilename = "{{{ CODE_FILENAME }}}".trim();
+if (codeFilename) {
   config.codeUrl = buildUrl + "/" + codeFilename;
 }
 
-var memoryFilename = "{{{ typeof MEMORY_FILENAME !== 'undefined' ? MEMORY_FILENAME : '' }}}";
+var memoryFilename = "{{{ MEMORY_FILENAME }}}".trim();
 if (memoryFilename) {
   config.memoryUrl = buildUrl + "/" + memoryFilename;
 }
 
-var symbolsFilename = "{{{ typeof SYMBOLS_FILENAME !== 'undefined' ? SYMBOLS_FILENAME : '' }}}";
+var symbolsFilename = "{{{ SYMBOLS_FILENAME }}}".trim();
 if (symbolsFilename) {
   config.symbolsUrl = buildUrl + "/" + symbolsFilename;
 }
@@ -59,9 +59,9 @@ if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))
   document.getElementsByTagName('head')[0].appendChild(meta);
 }
   
-var backgroundFilename = "{{{ typeof BACKGROUND_FILENAME !== 'undefined' ? BACKGROUND_FILENAME.replace(/'/g, '%27') : '' }}}";
+var backgroundFilename = "{{{ BACKGROUND_FILENAME }}}".trim();
 if (backgroundFilename) {
-  canvas.style.background = "url('" + buildUrl + "/" + backgroundFilename + "') center / cover";
+  canvas.style.background = "url('" + buildUrl + "/" + backgroundFilename.replace(/'/g, '%27') + "') center / cover";
 }
 loadingBar.style.display = "block";
   
