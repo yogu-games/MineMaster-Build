@@ -12,23 +12,42 @@ var loaderUrl = buildUrl + "/{{{ LOADER_FILENAME }}}";
 var config = {
   dataUrl: buildUrl + "/{{{ DATA_FILENAME }}}",
   frameworkUrl: buildUrl + "/{{{ FRAMEWORK_FILENAME }}}",
-#if USE_THREADS
-  workerUrl: buildUrl + "/{{{ WORKER_FILENAME }}}",
-#endif
-#if USE_WASM
-  codeUrl: buildUrl + "/{{{ CODE_FILENAME }}}",
-#endif
-#if MEMORY_FILENAME
-  memoryUrl: buildUrl + "/{{{ MEMORY_FILENAME }}}",
-#endif
-#if SYMBOLS_FILENAME
-  symbolsUrl: buildUrl + "/{{{ SYMBOLS_FILENAME }}}",
-#endif
   streamingAssetsUrl: "StreamingAssets",
-  companyName: {{{ JSON.stringify(COMPANY_NAME) }}},
-  productName: {{{ JSON.stringify(PRODUCT_NAME) }}},
-  productVersion: {{{ JSON.stringify(PRODUCT_VERSION) }}}
+  companyName: (function () {
+    try { return JSON.parse('{{{ JSON.stringify(COMPANY_NAME) }}}'); }
+    catch (e) { return typeof COMPANY_NAME !== "undefined" ? COMPANY_NAME : ""; }
+  })(),
+  productName: (function () {
+    try { return JSON.parse('{{{ JSON.stringify(PRODUCT_NAME) }}}'); }
+    catch (e) { return typeof PRODUCT_NAME !== "undefined" ? PRODUCT_NAME : ""; }
+  })(),
+  productVersion: (function () {
+    try { return JSON.parse('{{{ JSON.stringify(PRODUCT_VERSION) }}}'); }
+    catch (e) { return typeof PRODUCT_VERSION !== "undefined" ? PRODUCT_VERSION : ""; }
+  })()
 };
+
+var useThreads = JSON.parse("{{{ JSON.stringify((typeof USE_THREADS !== 'undefined') && USE_THREADS) }}}");
+var workerFilename = "{{{ typeof WORKER_FILENAME !== 'undefined' ? WORKER_FILENAME : '' }}}";
+if (useThreads && workerFilename) {
+  config.workerUrl = buildUrl + "/" + workerFilename;
+}
+
+var useWasm = JSON.parse("{{{ JSON.stringify((typeof USE_WASM !== 'undefined') && USE_WASM) }}}");
+var codeFilename = "{{{ typeof CODE_FILENAME !== 'undefined' ? CODE_FILENAME : '' }}}";
+if (useWasm && codeFilename) {
+  config.codeUrl = buildUrl + "/" + codeFilename;
+}
+
+var memoryFilename = "{{{ typeof MEMORY_FILENAME !== 'undefined' ? MEMORY_FILENAME : '' }}}";
+if (memoryFilename) {
+  config.memoryUrl = buildUrl + "/" + memoryFilename;
+}
+
+var symbolsFilename = "{{{ typeof SYMBOLS_FILENAME !== 'undefined' ? SYMBOLS_FILENAME : '' }}}";
+if (symbolsFilename) {
+  config.symbolsUrl = buildUrl + "/" + symbolsFilename;
+}
 
 if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))
 {
@@ -40,9 +59,10 @@ if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))
   document.getElementsByTagName('head')[0].appendChild(meta);
 }
   
-#if BACKGROUND_FILENAME
-canvas.style.background = "url('" + buildUrl + "/{{{ BACKGROUND_FILENAME.replace(/'/g, '%27') }}}') center / cover";
-#endif
+var backgroundFilename = "{{{ typeof BACKGROUND_FILENAME !== 'undefined' ? BACKGROUND_FILENAME.replace(/'/g, '%27') : '' }}}";
+if (backgroundFilename) {
+  canvas.style.background = "url('" + buildUrl + "/" + backgroundFilename + "') center / cover";
+}
 loadingBar.style.display = "block";
   
 var script = document.createElement("script");
