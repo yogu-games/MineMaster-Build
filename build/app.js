@@ -16,7 +16,7 @@ var config = {
   streamingAssetsUrl: "StreamingAssets",
   companyName: "YoGu-Games",
   productName: "MineMaster",
-  productVersion: "0.1.76"
+  productVersion: "0.1.77"
 };
 
 if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))
@@ -127,6 +127,17 @@ window.addEventListener('load', function ()
 {
   Telegram.WebApp.ready();
   Telegram.WebApp.expand();
+  try {
+    if (typeof Telegram.WebApp.setClosingBehavior === 'function') {
+      Telegram.WebApp.setClosingBehavior({ need_confirmation: true });
+      console.log('Telegram closing confirmation enabled');
+    } else if (typeof Telegram.WebApp.enableClosingConfirmation === 'function') {
+      Telegram.WebApp.enableClosingConfirmation();
+      console.log('Telegram closing confirmation enabled via legacy API');
+    }
+  } catch (e) {
+    console.warn('Unable to configure Telegram closing behavior', e);
+  }
   
   console.log("Telegram Web App has been expanded to full screen");
   
