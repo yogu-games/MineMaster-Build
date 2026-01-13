@@ -28,7 +28,7 @@ var config = {
   streamingAssetsUrl: "StreamingAssets",
   companyName: "YoGu-Games",
   productName: "MineMaster",
-  productVersion: "1.0.123"
+  productVersion: "1.0.124"
 };
 
 if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))
@@ -77,7 +77,7 @@ script.onload = () =>
       hintTimer = setInterval(function() {
         hintIndex += 1;
         setHint(hints[hintIndex % hints.length]);
-      }, 2400);
+      }, 6000);
     }
 
     function stopHints(finalText) {
