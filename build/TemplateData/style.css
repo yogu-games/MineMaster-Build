@@ -17,6 +17,11 @@ html, body { padding: 0; margin: 0; height: 100%; background: #000; }
 #unity-progress-bar-empty.fade-out { opacity: 0; }
 #unity-progress-bar-full { width: 0%; height: 18px; margin-top: 10px; background: url('progress-bar-full-dark.png') no-repeat center }
 #unity-warning { position: absolute; left: 50%; top: 5%; transform: translate(-50%); background: white; padding: 10px; display: none }
+/* Final phase status */
+#unity-status { margin-top: 12px; display: none; align-items: center; gap: 10px; justify-content: center; color: #fff; font-family: Arial, sans-serif; font-size: 13px; text-align: left; }
+#unity-spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.25); border-top-color: #fff; border-radius: 50%; animation: unity-spin 0.9s linear infinite; }
+#unity-hint { line-height: 1.4; opacity: 0.9; }
+@keyframes unity-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 /* Portrait enforcement overlay */
 #rotate-overlay { position:fixed; inset:0; background:#000; color:#fff; display:none; align-items:center; justify-content:center; text-align:center; font-family:Arial,sans-serif; padding:24px; z-index:10000; }
 body.landscape #rotate-overlay { display:flex; }

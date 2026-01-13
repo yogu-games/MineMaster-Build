@@ -7,6 +7,18 @@ var loadingBar = document.querySelector("#unity-loading-bar");
 var progressBarFull = document.querySelector("#unity-progress-bar-full");
 var progressBarEmpty = document.querySelector("#unity-progress-bar-empty");
 
+// Lightweight status UI for the tail end of loading
+var statusContainer = document.createElement("div");
+statusContainer.id = "unity-status";
+var statusSpinner = document.createElement("div");
+statusSpinner.id = "unity-spinner";
+var statusHint = document.createElement("div");
+statusHint.id = "unity-hint";
+statusContainer.appendChild(statusSpinner);
+statusContainer.appendChild(statusHint);
+statusContainer.style.display = "none";
+loadingBar.appendChild(statusContainer);
+
 var buildUrl = "Build";
 var loaderUrl = buildUrl + "/Default WebGL.loader.js";
 var config = {
@@ -16,7 +28,7 @@ var config = {
   streamingAssetsUrl: "StreamingAssets",
   companyName: "YoGu-Games",
   productName: "MineMaster",
-  productVersion: "1.0.121"
+  productVersion: "1.0.122"
 };
 
 if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))
@@ -36,49 +48,93 @@ script.src = loaderUrl;
   
 script.onload = () => 
 {
-    let indeterminateShown = false;
-    let finalizingMsg = null;
+    var progressAtFinalPhase = 0.87;
+    var maxShownProgress = 0.99; // keep some headroom for the real completion snap
+    var hints = [
+      "Sharpening pickaxes…",
+      "Sweeping up crystal dust…",
+      "Polishing gem shaders…",
+      "Hauling fresh ore to memory…",
+      "Checking canary in the code mine…",
+      "Stacking loot crates…",
+      "Mapping tunnels to WebAssembly…"
+    ];
+    var hintIndex = 0;
+    var hintTimer = null;
+    var finalPhaseStarted = false;
+    var currentDisplayProgress = 0;
+    var targetDisplayProgress = 0;
+    var rafId = null;
+
+    function setHint(text) {
+      statusHint.textContent = text;
+    }
+
+    function startHints() {
+      if (hintTimer) return;
+      statusContainer.style.display = "flex";
+      setHint(hints[hintIndex % hints.length]);
+      hintTimer = setInterval(function() {
+        hintIndex += 1;
+        setHint(hints[hintIndex % hints.length]);
+      }, 2400);
+    }
+
+    function stopHints(finalText) {
+      if (hintTimer) {
+        clearInterval(hintTimer);
+        hintTimer = null;
+      }
+      if (finalText) setHint(finalText);
+      statusSpinner.style.display = "none";
+    }
+
+    function updateBarWidth(p) {
+      var clamped = Math.max(0, Math.min(1, p));
+      progressBarFull.style.width = (clamped * 100) + "%";
+    }
+
+    function scheduleFrame() {
+      if (rafId) return;
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function tick() {
+      rafId = null;
+      var diff = targetDisplayProgress - currentDisplayProgress;
+      if (Math.abs(diff) < 0.001) {
+        currentDisplayProgress = targetDisplayProgress;
+      } else {
+        // Ease toward target, with a tiny floor to keep motion visible
+        currentDisplayProgress += diff * 0.08 + (diff > 0 ? 0.0015 : -0.0015);
+        scheduleFrame();
+      }
+      updateBarWidth(currentDisplayProgress);
+    }
+
+    function setProgressTarget(p) {
+      targetDisplayProgress = Math.max(targetDisplayProgress, p);
+      scheduleFrame();
+    }
+
     createUnityInstance(canvas, config, (progress) => 
     {
-      if (progress < 0.87) {
-        progressBarFull.style.width = (100 * (progress / 0.87)) + "%";
-        progressBarFull.classList.remove("indeterminate");
-        if (finalizingMsg) {
-          finalizingMsg.remove();
-          finalizingMsg = null;
-        }
-        indeterminateShown = false;
+      if (progress < progressAtFinalPhase) {
+        var mapped = (progress / progressAtFinalPhase) * 0.95; // maps to 0-95%
+        setProgressTarget(mapped);
       } else {
-        // Show indeterminate spinner/message at the end
-        if (!indeterminateShown) {
-          progressBarFull.style.width = "100%";
-          progressBarFull.classList.add("indeterminate");
-          // Fade out the progress bar graphics since we no longer need them
-          if (progressBarEmpty) {
-            progressBarEmpty.classList.add("fade-out");
-            const hideOnTransitionEnd = (e) => {
-              if (e.propertyName === "opacity") {
-                progressBarEmpty.style.display = "none";
-                progressBarEmpty.removeEventListener('transitionend', hideOnTransitionEnd);
-              }
-            };
-            progressBarEmpty.addEventListener('transitionend', hideOnTransitionEnd);
-          }
-          // Show a message
-          finalizingMsg = document.createElement("div");
-          finalizingMsg.id = "unity-finalizing-msg";
-          finalizingMsg.innerText = "Finalizing...";
-          finalizingMsg.style.marginTop = "10px";
-          finalizingMsg.style.textAlign = "center";
-          finalizingMsg.style.color = "#fff";
-          loadingBar.appendChild(finalizingMsg);
-          indeterminateShown = true;
+        if (!finalPhaseStarted) {
+          finalPhaseStarted = true;
+          startHints();
         }
+        setProgressTarget(maxShownProgress);
       }
     }
     ).then((unityInstance) => 
     {
       appInstance = unityInstance;
+      stopHints("Ready");
+      setProgressTarget(1);
       // Fade out loading bar
       loadingBar.style.transition = "opacity 0.5s";
       loadingBar.style.opacity = 0;
@@ -90,6 +146,7 @@ script.onload = () =>
     });
 };
   
+      stopHints();
 document.body.appendChild(script);
   
 // ---------------- Portrait Orientation Enforcement ----------------
