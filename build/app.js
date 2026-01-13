@@ -28,7 +28,7 @@ var config = {
   streamingAssetsUrl: "StreamingAssets",
   companyName: "YoGu-Games",
   productName: "MineMaster",
-  productVersion: "1.0.122"
+  productVersion: "1.0.123"
 };
 
 if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))
@@ -142,11 +142,11 @@ script.onload = () =>
     }
     ).catch((message) => 
     {
+      stopHints();
       alert(message);
     });
 };
-  
-      stopHints();
+
 document.body.appendChild(script);
   
 // ---------------- Portrait Orientation Enforcement ----------------
